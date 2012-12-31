@@ -9,6 +9,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -51,14 +52,21 @@ public class TextureCore extends JavaPlugin {
         }
         getPlayers();
         getServer().getPluginManager().registerEvents(new Listener() {
-            @EventHandler
-            void playerJoin(PlayerJoinEvent event) {
-                String pack = getPlayerPack(event.getPlayer().getName());
+            @EventHandler(priority = EventPriority.MONITOR)
+            void playerJoin(final PlayerJoinEvent event) {
+                final String pack = getPlayerPack(event.getPlayer().getName());
                 if (pack != null) {
-                    setPack(event.getPlayer(), pack);
+                    getServer().getScheduler().scheduleSyncDelayedTask(TextureCore.this, new Runnable() {
+                        @Override
+                        public void run() {
+                            setPack(event.getPlayer(), pack);
+                        }
+                    }, 10L);
                 }
             }
         }, this);
+        // Add SimpleNotice messenger
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "SimpleNotice");
     }
 
     public void onDisable() {
@@ -184,7 +192,12 @@ public class TextureCore extends JavaPlugin {
     public void setPack(Player player, String pack) {
         try {
             player.setTexturePack(packs.get(pack));
-            player.sendMessage("You have selected the " + ChatColor.GREEN + pack + ChatColor.RESET + " pack.");
+            String message = "You have selected the " + ChatColor.GREEN + pack + ChatColor.RESET + " pack.";
+            if (player.getListeningPluginChannels().contains("SimpleNotice")) {
+                player.sendPluginMessage(this, "SimpleNotice", message.getBytes(java.nio.charset.Charset.forName("UTF-8")));
+            } else {
+                player.sendMessage(message);
+            }
             getPlayers().set(player.getName().toLowerCase(), pack);
             savePlayers();
         } catch (IllegalArgumentException e) {
