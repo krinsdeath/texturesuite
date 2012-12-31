@@ -1,0 +1,39 @@
+name: TextureSuite
+main: net.krinsoft.texturesuite.TextureCore
+version: maven-version-number
+author: krinsdeath
+
+commands:
+  texture:
+    aliases: [textures, tex]
+    usage: |
+      /<command> ?                  - Show this help menu.
+      /<command> list               - List available texture packs.
+      /<command> get [pack]         - Get a texture pack.
+      /<command> add [name] [url]   - Add a texture pack to the list.
+      /<command> remove [name]      - Remove a texture pack from the list.
+      /<command> reload             - Reload the config file.
+      
+permissions:
+  texturesuite.*:
+    description: Allows access to all of TextureSuite's permissions.
+    children:
+      texturesuite.users: true
+      texturesuite.add: true
+      texturesuite.remove: true
+      texturesuite.reload: true
+  texturesuite.users:
+    description: Allows access to the list and get commands.
+    children:
+      texturesuite.list: true
+      texturesuite.get: true
+  texturesuite.list:
+    description: Allows the user to list available packs.
+  texturesuite.get:
+    description: Allows the user to get an available pack.
+  texturesuite.add:
+    description: Allows the user to add a new available pack.
+  texturesuite.remove:
+    description: Allows the user to remove an available pack.
+  texturesuite.reload:
+    description: Allows the user to reload TextureSuite's config file.
