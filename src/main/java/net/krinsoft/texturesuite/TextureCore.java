@@ -49,6 +49,7 @@ public class TextureCore extends JavaPlugin {
         } catch (RuntimeException e) {
             getLogger().info(e.getLocalizedMessage());
         }
+        getPlayers();
         getServer().getPluginManager().registerEvents(new Listener() {
             @EventHandler
             void playerJoin(PlayerJoinEvent event) {
