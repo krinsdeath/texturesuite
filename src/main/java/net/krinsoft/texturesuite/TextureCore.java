@@ -5,10 +5,16 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.RemoteConsoleCommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +28,7 @@ import java.util.Set;
 public class TextureCore extends JavaPlugin {
     private final Map<String, String> packs = new HashMap<String, String>();
     private boolean debug = false;
+    private FileConfiguration players;
 
     public void onEnable() {
         if (!new File(getDataFolder(), "config.yml").exists()) {
@@ -42,10 +49,21 @@ public class TextureCore extends JavaPlugin {
         } catch (RuntimeException e) {
             getLogger().info(e.getLocalizedMessage());
         }
+        getServer().getPluginManager().registerEvents(new Listener() {
+            @EventHandler
+            void playerJoin(PlayerJoinEvent event) {
+                String pack = getPlayerPack(event.getPlayer().getName());
+                if (pack != null) {
+                    setPack(event.getPlayer(), pack);
+                }
+            }
+        }, this);
     }
 
     public void onDisable() {
         packs.clear();
+        saveConfig();
+        savePlayers();
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -78,13 +96,7 @@ public class TextureCore extends JavaPlugin {
                     return true;
                 }
                 Player player = (Player) sender;
-                try {
-                    player.setTexturePack(packs.get(arguments.get(0)));
-                    player.sendMessage("You have selected the " + ChatColor.GREEN + arguments.get(0) + ChatColor.RESET + " pack.");
-                } catch (IllegalArgumentException e) {
-                    sender.sendMessage(ChatColor.RED + "The supplied pack name was invalid.");
-                    warn(e.getLocalizedMessage());
-                }
+                setPack(player, arguments.get(0));
             } else if (subCmd.equalsIgnoreCase("add")) {
                 if (arguments.size() < 2) {
                     sender.sendMessage(ChatColor.RED + "Must supply a pack name and a URL!");
@@ -161,6 +173,52 @@ public class TextureCore extends JavaPlugin {
         packs.remove(pack);
         saveConfig();
         return true;
+    }
+
+    /**
+     * Sets the player's current texture pack
+     * @param player The player whose texture pack is being set
+     * @param pack The name of the texture pack
+     */
+    public void setPack(Player player, String pack) {
+        try {
+            player.setTexturePack(packs.get(pack));
+            player.sendMessage("You have selected the " + ChatColor.GREEN + pack + ChatColor.RESET + " pack.");
+            getPlayers().set(player.getName().toLowerCase(), pack);
+            savePlayers();
+        } catch (IllegalArgumentException e) {
+            player.sendMessage(ChatColor.RED + "The supplied pack name was invalid.");
+            warn(e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * Get's the player's persisted texture pack
+     * @param player The player's name
+     * @return the name of the texture pack this player has set
+     */
+    public String getPlayerPack(String player) {
+        return getPlayers().getString(player.toLowerCase());
+    }
+
+    /**
+     * Gets the configuration file containing the player data
+     * @return The yaml object containing the player data
+     */
+    public FileConfiguration getPlayers() {
+        if (players == null) {
+            players = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "players.yml"));
+        }
+        return players;
+    }
+
+    public void savePlayers() {
+        try {
+            players.save(new File(getDataFolder(), "players.yml"));
+        } catch (IOException e) {
+            warn("An error occurred while saving the players.yml file! " + e.getLocalizedMessage());
+
+        }
     }
 
 }
