@@ -75,6 +75,29 @@ public class TextureCore extends JavaPlugin {
         savePlayers();
     }
 
+    private final String[] subCmds = new String[] { "list", "get", "reset", "add", "remove", "reload" };
+
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> tabbed = new ArrayList<String>();
+        if (args.length > 0 && args[0].equalsIgnoreCase("get")) {
+            String toComplete = args[args.length-1];
+            for (String pack : packs.keySet()) {
+                if (pack.startsWith(toComplete)) {
+                    tabbed.add(pack);
+                }
+            }
+            return tabbed;
+        } else if (args.length > 0) {
+            for (String cmd : subCmds) {
+                if (cmd.startsWith(args[0])) {
+                    tabbed.add(cmd);
+                }
+            }
+            return tabbed;
+        }
+        return null;
+    }
+
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length < 1 || args[0].equalsIgnoreCase("?") || args[0].equalsIgnoreCase("help")) {
             return false;
