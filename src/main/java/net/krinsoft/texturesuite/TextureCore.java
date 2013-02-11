@@ -104,8 +104,19 @@ public class TextureCore extends JavaPlugin {
                     sender.sendMessage(ChatColor.RED + "You must supply a pack name!");
                     return true;
                 }
-                Player player = (Player) sender;
-                setPack(player, arguments.get(0));
+                setPack((Player) sender, arguments.get(0));
+            } else if (subCmd.equalsIgnoreCase("reset")) {
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage(ChatColor.RED + "To reset a texture pack, you must be a player!");
+                    return true;
+                }
+                if (getPlayerPack(sender.getName()) == null) {
+                    sender.sendMessage(ChatColor.RED + "You are already using a default texture pack.");
+                    return true;
+                }
+                setPack((Player) sender, null);
+                sender.sendMessage(ChatColor.GREEN + "Texture pack reset to default.");
+                sender.sendMessage(ChatColor.GREEN + "Please " + ChatColor.GOLD + "relog " + ChatColor.GREEN + "to apply the change.");
             } else if (subCmd.equalsIgnoreCase("add")) {
                 if (arguments.size() < 2) {
                     sender.sendMessage(ChatColor.RED + "Must supply a pack name and a URL!");
@@ -191,6 +202,11 @@ public class TextureCore extends JavaPlugin {
      */
     public void setPack(Player player, String pack) {
         try {
+            if (pack == null) {
+                getPlayers().set(player.getName().toLowerCase(), null);
+                savePlayers();
+                return;
+            }
             player.setTexturePack(packs.get(pack));
             String message = "You have selected the " + ChatColor.GREEN + pack + ChatColor.RESET + " pack.";
             if (player.getListeningPluginChannels().contains("SimpleNotice")) {

@@ -10,6 +10,7 @@ commands:
       /<command> ?                  - Show this help menu.
       /<command> list               - List available texture packs.
       /<command> get [pack]         - Get a texture pack.
+      /<command> reset              - Resets your pack selection.
       /<command> add [name] [url]   - Add a texture pack to the list.
       /<command> remove [name]      - Remove a texture pack from the list.
       /<command> reload             - Reload the config file.
@@ -27,10 +28,13 @@ permissions:
     children:
       texturesuite.list: true
       texturesuite.get: true
+      texturesuite.reset: true
   texturesuite.list:
     description: Allows the user to list available packs.
   texturesuite.get:
     description: Allows the user to get an available pack.
+  texturesuite.reset:
+    description: Allows the user to reset their texture pack selection.
   texturesuite.add:
     description: Allows the user to add a new available pack.
   texturesuite.remove:
