@@ -37,16 +37,7 @@ public class TextureCore extends JavaPlugin {
         }
         try {
             debug = getConfig().getBoolean("debug");
-            for (String key : getConfig().getConfigurationSection("packs").getKeys(false)) {
-                String url = getConfig().getString("packs." + key);
-                if (url.equalsIgnoreCase("insert URL here!")) {
-                    throw new RuntimeException("Check config.yml to customize the texture pack list.");
-                }
-                packs.put(key, url);
-            }
-            debug(packs.size() + " pack" + (packs.size() > 1 ? "s": "") + " loaded.");
-        } catch (NullPointerException e) {
-            warn("No packs are defined in the config.yml!");
+            setupPacks();
         } catch (RuntimeException e) {
             getLogger().info(e.getLocalizedMessage());
         }
@@ -162,12 +153,29 @@ public class TextureCore extends JavaPlugin {
                 }
             } else if (subCmd.equalsIgnoreCase("reload")) {
                 reloadConfig();
+                setupPacks();
                 sender.sendMessage("TextureSuite's config file has been reloaded.");
             }
             return true;
         } else {
             sender.sendMessage(ChatColor.RED + "You do not have permission to use that command.");
             return true;
+        }
+    }
+
+    private void setupPacks() {
+        try {
+            packs.clear();
+            for (String key : getConfig().getConfigurationSection("packs").getKeys(false)) {
+                String url = getConfig().getString("packs." + key);
+                if (url.equalsIgnoreCase("insert URL here!")) {
+                    throw new RuntimeException("Check config.yml to customize the texture pack list.");
+                }
+                packs.put(key, url);
+            }
+            debug(packs.size() + " pack" + (packs.size() > 1 ? "s": "") + " loaded.");
+        } catch (NullPointerException e) {
+            warn("No packs are defined in the config.yml!");
         }
     }
 
