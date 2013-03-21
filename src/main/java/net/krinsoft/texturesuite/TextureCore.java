@@ -89,7 +89,7 @@ public class TextureCore extends JavaPlugin {
             return tabbed;
         } else if (args.length > 0) {
             for (String cmd : subCmds) {
-                if (cmd.startsWith(args[0])) {
+                if (cmd.startsWith(args[0]) && hasPermission(sender, cmd)) {
                     tabbed.add(cmd);
                 }
             }
