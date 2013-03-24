@@ -233,12 +233,13 @@ public class TextureCore extends JavaPlugin {
      */
     public void setPack(Player player, String pack) {
         try {
-            if (pack == null) {
+            String url;
+            if (pack == null || (url = packs.get(pack)) == null) {
                 getPlayers().set(player.getName().toLowerCase(), null);
                 savePlayers();
                 return;
             }
-            player.setTexturePack(packs.get(pack));
+            player.setTexturePack(url);
             String message = "You have selected the " + ChatColor.GREEN + pack + ChatColor.RESET + " pack.";
             if (player.getListeningPluginChannels().contains("SimpleNotice")) {
                 player.sendPluginMessage(this, "SimpleNotice", message.getBytes(java.nio.charset.Charset.forName("UTF-8")));
